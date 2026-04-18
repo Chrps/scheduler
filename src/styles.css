@@ -1,3 +1,492 @@
-/* You can add global styles to this file, and also import other style files */
+@import '@angular/material/prebuilt-themes/azure-blue.css';
 
-@import 'tailwindcss';
+/* Make mat-chips non-interactive (no hover/focus ripple) */
+mat-chip {
+	pointer-events: none;
+}
+
+/* Nav bar: push lang + sign-out to the right */
+.app-nav-spacer {
+	flex: 1;
+	min-width: 0.5rem;
+}
+
+/* Language select in nav */
+.app-lang-select {
+	font-size: 1.2rem;
+	border: 1px solid rgba(0, 0, 0, 0.2);
+	border-radius: 8px;
+	padding: 4px 4px;
+	background: rgba(255, 255, 255, 0.72);
+	cursor: pointer;
+	appearance: none;
+	-webkit-appearance: none;
+	text-align: center;
+}
+
+/* Red sign-out button */
+.app-sign-out-btn {
+	--mdc-outlined-button-label-text-color: #d32f2f;
+	--mdc-outlined-button-outline-color: #d32f2f;
+	color: #d32f2f !important;
+	border-color: #d32f2f !important;
+	white-space: nowrap;
+	flex-shrink: 0;
+}
+.app-sign-out-btn .mat-icon {
+	color: #d32f2f;
+}
+
+:root {
+	--app-font-family: Inter, Roboto, 'Segoe UI', Arial, sans-serif;
+	--app-font-size: 16px;
+	--app-font-size-sm: 0.95rem;
+	--app-font-size-lg: clamp(1.9rem, 1.2rem + 2vw, 3rem);
+	--app-radius-sm: 12px;
+	--app-radius-md: 18px;
+	--app-radius-lg: 28px;
+	--app-page-max: 1040px;
+	--app-page-narrow: 460px;
+	--app-space-1: 0.5rem;
+	--app-space-2: 0.75rem;
+	--app-space-3: 1rem;
+	--app-space-4: 1.5rem;
+	--app-space-5: 2rem;
+	--app-space-6: 3rem;
+	--app-surface: rgba(255, 255, 255, 0.78);
+	--app-surface-strong: rgba(255, 255, 255, 0.92);
+	--app-outline: rgba(255, 255, 255, 0.55);
+	--app-shadow-lg: 0 24px 70px rgba(15, 23, 42, 0.16);
+	--app-shadow-md: 0 14px 38px rgba(15, 23, 42, 0.1);
+	--app-shadow-sm: 0 10px 24px rgba(15, 23, 42, 0.08);
+	--app-hero-start: #eef4ff;
+	--app-hero-mid: #f6f7ff;
+	--app-hero-end: #eefcf7;
+	--app-success: #1e7a44;
+	--app-error: #b3261e;
+}
+
+html,
+body {
+	min-height: 100%;
+}
+
+body {
+	margin: 0;
+	min-height: 100dvh;
+	font-family: var(--app-font-family);
+	font-size: var(--app-font-size);
+	background:
+		radial-gradient(circle at top left, rgba(92, 138, 255, 0.22), transparent 30%),
+		radial-gradient(circle at top right, rgba(94, 234, 212, 0.18), transparent 26%),
+		linear-gradient(180deg, var(--app-hero-start) 0%, var(--app-hero-mid) 48%, var(--app-hero-end) 100%);
+	background-attachment: fixed;
+	color: var(--mat-sys-on-surface);
+}
+
+* {
+	box-sizing: border-box;
+}
+
+h1,
+h2,
+h3,
+p {
+	margin: 0;
+}
+
+h1 {
+	font-size: var(--app-font-size-lg);
+	font-weight: 700;
+	letter-spacing: -0.04em;
+	line-height: 1.05;
+}
+
+h2 {
+	font-size: 1.1rem;
+	font-weight: 650;
+	letter-spacing: -0.02em;
+}
+
+p {
+	line-height: 1.55;
+}
+
+.app-page {
+	min-height: 100dvh;
+	padding: clamp(1rem, 2vw, 2rem);
+	display: grid;
+	place-items: center;
+	position: relative;
+}
+
+.app-page-top {
+	align-items: start;
+}
+
+.app-shell {
+	width: min(100%, var(--app-page-max));
+	display: grid;
+	gap: var(--app-space-4);
+}
+
+.app-page-selector {
+	display: flex;
+	align-items: center;
+	flex-wrap: nowrap;
+	gap: var(--app-space-2);
+	padding: var(--app-space-2);
+	border-radius: var(--app-radius-md);
+	background: var(--app-surface);
+	backdrop-filter: blur(12px);
+	border: 1px solid var(--app-outline);
+	box-shadow: var(--app-shadow-sm);
+	overflow-x: auto;
+}
+
+.app-page-selector .mat-mdc-outlined-button {
+	background: rgba(255, 255, 255, 0.72);
+	border-color: rgba(255, 255, 255, 0.85);
+	font-weight: 600;
+}
+
+.app-page-selector .mat-icon {
+	font-size: 18px;
+	width: 18px;
+	height: 18px;
+}
+
+.app-hero {
+	display: grid;
+	gap: var(--app-space-2);
+	justify-items: start;
+	padding: var(--app-space-3) var(--app-space-1);
+}
+
+.app-kicker {
+	font-size: 0.82rem;
+	font-weight: 700;
+	letter-spacing: 0.12em;
+	text-transform: uppercase;
+	color: color-mix(in srgb, var(--mat-sys-primary) 72%, black 8%);
+}
+
+.app-lead {
+	max-width: 60ch;
+	font-size: 1rem;
+	color: color-mix(in srgb, var(--mat-sys-on-surface-variant) 85%, black 12%);
+}
+
+.app-card {
+	width: min(100%, var(--app-page-narrow));
+	border-radius: var(--app-radius-lg) !important;
+	background: var(--app-surface) !important;
+	backdrop-filter: blur(18px);
+	border: 1px solid var(--app-outline);
+	box-shadow: var(--app-shadow-lg) !important;
+}
+
+.app-card-wide {
+	width: min(100%, var(--app-page-max));
+	border-radius: var(--app-radius-lg) !important;
+	background: var(--app-surface) !important;
+	backdrop-filter: blur(18px);
+	border: 1px solid var(--app-outline);
+	box-shadow: var(--app-shadow-lg) !important;
+}
+
+.app-stack {
+	display: grid;
+	gap: var(--app-space-3);
+}
+
+.app-stack-sm {
+	display: grid;
+	gap: var(--app-space-2);
+}
+
+.app-row {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: var(--app-space-2);
+	flex-wrap: nowrap;
+}
+
+.app-row-end {
+	display: flex;
+	justify-content: flex-end;
+	gap: var(--app-space-2);
+	flex-wrap: wrap;
+}
+
+.app-form-grid {
+	display: grid;
+	gap: var(--app-space-2);
+}
+
+.app-form-grid .mat-mdc-form-field,
+.app-form-inline .mat-mdc-form-field {
+	width: 100%;
+}
+
+.app-form-inline {
+	display: flex;
+	gap: var(--app-space-2);
+	align-items: flex-start;
+}
+
+.app-form-inline .mat-mdc-form-field {
+	flex: 1;
+}
+
+.app-form-inline button[mat-flat-button] {
+	height: 56px;
+}
+
+@media (max-width: 720px) {
+	.app-form-inline {
+		flex-direction: column;
+	}
+}
+
+.app-msg {
+	color: var(--app-success);
+	font-weight: 600;
+}
+
+.app-error {
+	color: var(--app-error);
+	font-weight: 600;
+}
+
+.app-hint {
+	color: var(--mat-sys-on-surface-variant);
+	font-size: var(--app-font-size-sm);
+}
+
+.app-list {
+	display: grid;
+	gap: var(--app-space-2);
+	max-height: 400px;
+	overflow-y: auto;
+}
+
+.app-surface-grid {
+	display: grid;
+	gap: var(--app-space-3);
+}
+
+.app-surface-card {
+	padding: var(--app-space-3);
+	border-radius: var(--app-radius-md);
+	background: var(--app-surface-strong);
+	border: 1px solid rgba(255, 255, 255, 0.75);
+	box-shadow: var(--app-shadow-sm);
+}
+
+.app-surface-card mat-card-content {
+	padding: 0 !important;
+}
+
+.app-surface-card .mat-mdc-card-content:last-child {
+	padding-bottom: 0;
+}
+
+.app-meta {
+	display: grid;
+	gap: 0.35rem;
+}
+
+/* List item row: content left, actions right, single line */
+.app-list-item {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: var(--app-space-2);
+	padding: 0.75rem 1rem;
+	border-radius: var(--app-radius-md);
+	background: var(--app-surface-strong);
+	border: 1px solid rgba(0, 0, 0, 0.12);
+	box-shadow: var(--app-shadow-sm);
+}
+
+.app-list-item .app-item-label {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+	flex: 1;
+	min-width: 0;
+}
+
+/* Add button with bottom spacing before lists */
+.app-add-btn {
+	margin-bottom: var(--app-space-2);
+	justify-self: start;
+	align-self: flex-start;
+}
+
+.app-title-row {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: var(--app-space-2);
+	flex-wrap: wrap;
+}
+
+.app-actions {
+	display: flex;
+	gap: var(--app-space-2);
+	flex-wrap: wrap;
+}
+
+.app-data-points {
+	display: grid;
+	gap: var(--app-space-2);
+}
+
+.app-data-pill {
+	padding: 0.85rem 1rem;
+	border-radius: var(--app-radius-md);
+	background: rgba(255, 255, 255, 0.6);
+	border: 1px solid rgba(255, 255, 255, 0.7);
+}
+
+.app-data-label {
+	display: block;
+	font-size: 0.8rem;
+	font-weight: 700;
+	letter-spacing: 0.06em;
+	text-transform: uppercase;
+	color: var(--mat-sys-on-surface-variant);
+	margin-bottom: 0.35rem;
+}
+
+.toolbar-spacer {
+	flex: 1 1 auto;
+}
+
+.app-card mat-card-content,
+.app-card-wide mat-card-content {
+	padding-top: var(--app-space-2);
+}
+
+.mat-toolbar {
+	border-radius: calc(var(--app-radius-md) - 2px);
+	background: linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(242, 247, 255, 0.92)) !important;
+	border: 1px solid rgba(255, 255, 255, 0.72);
+	box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.75);
+}
+
+.mat-mdc-card-header {
+	padding-bottom: 0.25rem;
+}
+
+.mat-mdc-card-title {
+	font-size: clamp(1.4rem, 1rem + 1vw, 2rem) !important;
+	font-weight: 700 !important;
+	letter-spacing: -0.03em;
+}
+
+.mat-mdc-card-subtitle {
+	font-size: 0.98rem !important;
+	color: color-mix(in srgb, var(--mat-sys-on-surface-variant) 86%, black 12%) !important;
+}
+
+.mat-mdc-card-actions {
+	padding-top: var(--app-space-2) !important;
+}
+
+.mat-mdc-form-field {
+	--mdc-outlined-text-field-container-shape: var(--app-radius-md);
+}
+
+.mat-mdc-unelevated-button,
+.mat-mdc-outlined-button,
+.mat-mdc-button {
+	border-radius: calc(var(--app-radius-md) - 4px) !important;
+}
+
+.mat-mdc-unelevated-button:not(:disabled) {
+	box-shadow: 0 10px 24px color-mix(in srgb, var(--mat-sys-primary) 22%, transparent);
+}
+
+.mat-mdc-chip {
+	border-radius: 999px !important;
+}
+
+.mat-mdc-tab-group {
+	border-radius: var(--app-radius-md);
+	overflow: hidden;
+	background: rgba(255, 255, 255, 0.4);
+	padding: 0.25rem;
+	border: 1px solid rgba(255, 255, 255, 0.58);
+}
+
+.mat-mdc-tab-body-content {
+	padding-top: var(--app-space-3);
+}
+
+@media (max-width: 720px) {
+	.app-page {
+		padding: 1rem;
+	}
+
+	.app-card,
+	.app-card-wide {
+		border-radius: 22px !important;
+	}
+
+	.app-surface-card {
+		padding: var(--app-space-2);
+	}
+}
+/* Language Switcher */
+.app-lang-switcher {
+	display: flex;
+	gap: var(--app-space-2);
+	justify-content: center;
+	margin-top: var(--app-space-6);
+	padding: var(--app-space-3);
+	background: var(--app-surface);
+	border-radius: var(--app-radius-md);
+	backdrop-filter: blur(10px);
+	box-shadow: var(--app-shadow-sm);
+}
+
+.app-lang-switcher button {
+	min-width: 48px !important;
+	height: 48px !important;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-weight: 600;
+	font-size: 0.85rem;
+	letter-spacing: 0.5px;
+	border-radius: var(--app-radius-sm) !important;
+	transition: all 0.2s ease;
+	opacity: 0.6;
+}
+
+.app-lang-switcher button.active {
+	opacity: 1;
+	background: rgba(92, 138, 255, 0.15) !important;
+	color: #5c8aff;
+}
+
+.app-lang-switcher button:hover {
+	opacity: 0.85;
+}
+
+@media (max-width: 720px) {
+	.app-lang-switcher {
+		margin-top: var(--app-space-5);
+		padding: var(--app-space-2);
+	}
+
+	.app-lang-switcher button {
+		min-width: 40px !important;
+		height: 40px !important;
+		font-size: 0.75rem;
+	}
+}

@@ -42,3 +42,10 @@ __screenshots__/
 # System files
 .DS_Store
 Thumbs.db
+
+# Local environment and Supabase runtime state
+.env
+.env.local
+.supabase/
+supabase/.temp/
+supabase/.branches/

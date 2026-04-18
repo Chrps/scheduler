@@ -18,6 +18,7 @@
           "options": {
             "browser": "src/main.ts",
             "tsConfig": "tsconfig.app.json",
+            "outputPath": "dist/cleaning-schedular",
             "assets": [
               {
                 "glob": "**/*",
@@ -33,7 +34,7 @@
               "budgets": [
                 {
                   "type": "initial",
-                  "maximumWarning": "500kB",
+                  "maximumWarning": "600kB",
                   "maximumError": "1MB"
                 },
                 {
@@ -47,7 +48,13 @@
             "development": {
               "optimization": false,
               "extractLicenses": false,
-              "sourceMap": true
+              "sourceMap": true,
+              "fileReplacements": [
+                {
+                  "replace": "src/environments/environment.ts",
+                  "with": "src/environments/environment.development.ts"
+                }
+              ]
             }
           },
           "defaultConfiguration": "production"
@@ -59,7 +66,10 @@
               "buildTarget": "cleaning-schedular:build:production"
             },
             "development": {
-              "buildTarget": "cleaning-schedular:build:development"
+              "buildTarget": "cleaning-schedular:build:development",
+              "hmr": false,
+              "liveReload": true,
+              "poll": 1000
             }
           },
           "defaultConfiguration": "development"
