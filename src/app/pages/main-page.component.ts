@@ -11,7 +11,8 @@ import { CalendarOptions, EventInput } from '@fullcalendar/core';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
-import { AppRole, ScheduleInterval, ScheduleWithDetails, SupabaseService } from '../services/supabase.service';
+import daLocale from '@fullcalendar/core/locales/da';
+import { AppRole, RepeatUnit, ScheduleWithDetails, SupabaseService } from '../services/supabase.service';
 import { ScheduleDialogComponent } from '../dialogs/schedule-dialog.component';
 import { DeleteButtonComponent } from '../components/delete-button.component';
 
@@ -80,7 +81,7 @@ import { DeleteButtonComponent } from '../components/delete-button.component';
                     <div class="app-list-item">
                       <div class="app-item-label">
                         <strong>{{ scheduleName(s) }}</strong>
-                        <span class="app-hint">{{ intervalLabel(s.interval) }} · {{ s.start_date }}</span>
+                        <span class="app-hint">{{ repeatLabel(s) }} · {{ s.start_date }}</span>
                       </div>
                       <app-delete-btn (confirm)="removeSchedule(s.id)" />
                     </div>
@@ -99,6 +100,47 @@ import { DeleteButtonComponent } from '../components/delete-button.component';
     .app-schedule-actions {
       margin-bottom: 1rem;
     }
+
+    :host ::ng-deep .fc .fc-button {
+      background: rgba(255, 255, 255, 0.72);
+      border: 1px solid rgba(255, 255, 255, 0.85);
+      color: var(--mat-sys-on-surface, #1a1a1a);
+      font-weight: 600;
+      border-radius: 14px;
+      text-transform: capitalize;
+      box-shadow: none;
+      transition: all 0.2s ease;
+    }
+
+    :host ::ng-deep .fc .fc-button:hover {
+      background: rgba(92, 138, 255, 0.12);
+      border-color: rgba(92, 138, 255, 0.3);
+    }
+
+    :host ::ng-deep .fc .fc-button-active,
+    :host ::ng-deep .fc .fc-button:active {
+      background: rgba(92, 138, 255, 0.18) !important;
+      color: var(--mat-sys-primary, #5c8aff) !important;
+      border-color: rgba(92, 138, 255, 0.4) !important;
+      box-shadow: 0 10px 24px color-mix(in srgb, var(--mat-sys-primary, #5c8aff) 22%, transparent);
+    }
+
+    :host ::ng-deep .fc .fc-button:focus {
+      box-shadow: 0 0 0 2px rgba(92, 138, 255, 0.25);
+    }
+
+    :host ::ng-deep .fc .fc-toolbar-title {
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    :host ::ng-deep .fc .fc-daygrid-event {
+      border-radius: 8px;
+      border: none;
+      background: color-mix(in srgb, var(--mat-sys-primary, #5c8aff) 85%, black 5%);
+      padding: 2px 6px;
+      font-size: 0.85rem;
+    }
   `],
 })
 export class MainPageComponent {
@@ -113,6 +155,8 @@ export class MainPageComponent {
   protected readonly calendarOptions = signal<CalendarOptions>({
     plugins: [dayGridPlugin, timeGridPlugin, interactionPlugin],
     initialView: 'dayGridMonth',
+    locales: [daLocale],
+    locale: this.translocoService.getActiveLang() === 'da' ? 'da' : 'en',
     headerToolbar: {
       left: 'prev,today,next',
       center: 'title',
@@ -126,11 +170,21 @@ export class MainPageComponent {
   constructor() {
     void this.loadProfile();
     void this.loadSchedules();
+
+    // React to language changes — update calendar locale and re-render event titles
+    this.translocoService.langChanges$.subscribe((lang) => {
+      this.calendarOptions.update((opts) => ({
+        ...opts,
+        locale: lang === 'da' ? 'da' : 'en',
+      }));
+      void this.loadSchedules();
+    });
   }
 
   protected openAddDialog(preselectedDate?: string) {
     const ref = this.dialog.open(ScheduleDialogComponent, {
-      width: '420px',
+      width: '480px',
+      maxWidth: '95vw',
       data: { preselectedDate },
     });
 
@@ -157,9 +211,19 @@ export class MainPageComponent {
     return roomName ? `${taskName} — ${roomName}` : (taskName ?? '');
   }
 
-  protected intervalLabel(interval: ScheduleInterval): string {
-    const key = `schedule.interval${interval.charAt(0).toUpperCase() + interval.slice(1)}`;
-    return this.translocoService.translate(key);
+  protected repeatLabel(s: ScheduleWithDetails): string {
+    const t = this.translocoService;
+    const unitKey = `schedule.unitLabel.${s.repeat_unit}`;
+    if (s.repeat_mode === 'per') {
+      const perUnit = t.translate(unitKey + '.per');
+      return s.repeat_every === 1
+        ? `${t.translate('schedule.previewOnceA')} ${perUnit}`
+        : `${s.repeat_every} ${t.translate('schedule.previewTimesA')} ${perUnit}`;
+    }
+    const unit = t.translate(unitKey + '.one');
+    return s.repeat_every === 1
+      ? `${t.translate('schedule.previewEvery')} ${unit}`
+      : `${t.translate('schedule.previewEveryN')} ${s.repeat_every}. ${unit}`;
   }
 
   protected async signOut() {
@@ -193,11 +257,12 @@ export class MainPageComponent {
     // Convert schedules to FullCalendar events
     const events: EventInput[] = [];
     const today = new Date();
-    const end = new Date(today);
-    end.setMonth(end.getMonth() + 3); // generate events 3 months ahead
+    const fallbackEnd = new Date(today);
+    fallbackEnd.setMonth(fallbackEnd.getMonth() + 3); // generate events 3 months ahead if no end_date
 
     for (const s of items) {
       const start = new Date(s.start_date);
+      const end = s.end_date ? new Date(s.end_date) : fallbackEnd;
       const lang = this.translocoService.getActiveLang();
       const taskName = lang === 'da' ? s.tasks?.name_da : s.tasks?.name_en;
       const roomName = s.rooms ? (lang === 'da' ? s.rooms.name_da : s.rooms.name_en) : null;
@@ -205,21 +270,30 @@ export class MainPageComponent {
 
       const increment = (d: Date) => {
         const next = new Date(d);
-        switch (s.interval) {
-          case 'daily': next.setDate(next.getDate() + 1); break;
-          case 'weekly': next.setDate(next.getDate() + 7); break;
-          case 'biweekly': next.setDate(next.getDate() + 14); break;
-          case 'monthly': next.setMonth(next.getMonth() + 1); break;
+        if (s.repeat_mode === 'per') {
+          // "N times per unit" → divide the unit into N equal steps
+          const unitDays: Record<string, number> = { day: 1, week: 7, month: 30, quarter: 91, year: 365 };
+          const stepDays = Math.max(1, Math.round((unitDays[s.repeat_unit] ?? 7) / s.repeat_every));
+          next.setDate(next.getDate() + stepDays);
+        } else {
+          // "every N units"
+          switch (s.repeat_unit) {
+            case 'day': next.setDate(next.getDate() + s.repeat_every); break;
+            case 'week': next.setDate(next.getDate() + 7 * s.repeat_every); break;
+            case 'month': next.setMonth(next.getMonth() + s.repeat_every); break;
+            case 'quarter': next.setMonth(next.getMonth() + 3 * s.repeat_every); break;
+            case 'year': next.setFullYear(next.getFullYear() + s.repeat_every); break;
+          }
         }
         return next;
       };
 
-      let current = start < today ? new Date(start) : start;
+      let current = new Date(start);
       // Fast-forward past dates to near today
       while (current < today) {
         current = increment(current);
       }
-      // Generate events up to end date
+      // Generate events up to schedule end date
       while (current <= end) {
         events.push({
           title,

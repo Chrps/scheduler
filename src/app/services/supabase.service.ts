@@ -40,7 +40,8 @@ export type Task = {
   updated_at?: string;
 };
 
-export type ScheduleInterval = 'daily' | 'weekly' | 'biweekly' | 'monthly';
+export type RepeatUnit = 'day' | 'week' | 'month' | 'quarter' | 'year';
+export type RepeatMode = 'every' | 'per';
 
 export type Schedule = {
   id: string;
@@ -48,7 +49,10 @@ export type Schedule = {
   task_id: string;
   room_id: string | null;
   start_date: string;
-  interval: ScheduleInterval;
+  end_date: string | null;
+  repeat_every: number;
+  repeat_unit: RepeatUnit;
+  repeat_mode: RepeatMode;
   created_at: string;
   updated_at?: string;
 };
@@ -449,7 +453,7 @@ export class SupabaseService {
     return Array.isArray(data) ? data : [];
   }
 
-  async addSchedule(taskId: string, roomId: string | null, startDate: string, interval: ScheduleInterval) {
+  async addSchedule(taskId: string, roomId: string | null, startDate: string, endDate: string | null, repeatEvery: number, repeatUnit: RepeatUnit, repeatMode: RepeatMode) {
     const userResult = await this.getUser();
     const userId = userResult.data.user?.id;
 
@@ -464,7 +468,10 @@ export class SupabaseService {
         task_id: taskId,
         room_id: roomId || null,
         start_date: startDate,
-        interval,
+        end_date: endDate || null,
+        repeat_every: repeatEvery,
+        repeat_unit: repeatUnit,
+        repeat_mode: repeatMode,
       });
 
     if (error) {

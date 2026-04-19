@@ -8,13 +8,14 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatNativeDateModule } from '@angular/material/core';
 import { TranslocoModule, TranslocoService } from '@jsverse/transloco';
-import { Room, ScheduleInterval, SupabaseService, Task } from '../services/supabase.service';
+import { RepeatUnit, Room, SupabaseService, Task } from '../services/supabase.service';
 
 export type ScheduleDialogResult = {
   taskId: string;
   roomId: string | null;
   startDate: string;
-  interval: ScheduleInterval;
+  repeatEvery: number;
+  repeatUnit: RepeatUnit;
 };
 
 @Component({
@@ -96,7 +97,7 @@ export class AddScheduleDialogComponent implements OnInit {
   protected readonly form = this.fb.nonNullable.group({
     taskId: ['', Validators.required],
     roomId: [null as string | null],
-    interval: ['weekly' as ScheduleInterval, Validators.required],
+    interval: ['weekly' as RepeatUnit, Validators.required],
     startDate: [new Date(), Validators.required],
   });
 
@@ -131,7 +132,8 @@ export class AddScheduleDialogComponent implements OnInit {
       taskId,
       roomId,
       startDate: dateStr,
-      interval,
+      repeatEvery: 1,
+      repeatUnit: interval,
     } satisfies ScheduleDialogResult);
   }
 }
